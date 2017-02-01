@@ -5,7 +5,7 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS2000ACSConsole", "PS2000ACSConsole.csproj", "{4F5EA46C-7ACA-44CA-A9F9-6DAE9929CCB9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoGUI", "..\PicoGUI\PicoGUI.csproj", "{98097AE8-A6CD-4368-9879-CB7A11CC8F0A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoGUI", "PicoGUI\PicoGUI.csproj", "{98097AE8-A6CD-4368-9879-CB7A11CC8F0A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
