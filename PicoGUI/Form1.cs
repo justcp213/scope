@@ -8,13 +8,20 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+
+
 namespace PicoGUI
 {
+   
+    
     public partial class Form1 : Form
     {
        public bool button2status = false;
-        Worker picoclass = new Worker();
-        public Form1()
+       Worker picoclass = new Worker();
+        public const short ON = 1;
+        public const short OFF = 0;
+               
+    public Form1()
         {
             InitializeComponent();
         }
@@ -55,10 +62,14 @@ namespace PicoGUI
 
         private void Thread_program()
         {
+            short channelA = ON;   
+            short channelB = OFF;
+
             bool progress;
 
-            progress = picoclass.InitPS2000A();
-            progress = picoclass.SetChannel();
+            progress = picoclass.InitPS2000A();        
+            progress = picoclass.SetChannel(channelA,channelB, PS2000ACSConsole.Imports.Range.Range_2V);
+
             progress = picoclass.SetDataBuffer();
             progress = picoclass.RunStreaming();
         }

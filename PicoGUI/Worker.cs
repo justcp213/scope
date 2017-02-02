@@ -43,15 +43,26 @@ namespace PicoGUI
             
         }
 
-        public bool SetChannel()
+        public bool SetChannel(short channelA_OnOff, short channelB_OnOff, Imports.Range VoltageLevel)
         {
             pStat = PS2000ACSConsole.Imports.SetTriggerChannelProperties(handle, null, 0, 0, 0); //Disable Trigger
+
+            //Channel A
             pStat = PS2000ACSConsole.Imports.SetChannel(handle,
-                                                        PS2000ACSConsole.Imports.Channel.ChannelA,
+                                                        Imports.Channel.ChannelA,
+                                                        channelA_OnOff,
                                                         1,
-                                                        1, 
-                                                        PS2000ACSConsole.Imports.Range.Range_5V, 0
+                                                        VoltageLevel, 0
                                                         );
+            //Channel B
+            pStat = PS2000ACSConsole.Imports.SetChannel(handle,
+                                                        Imports.Channel.ChannelB,
+                                                        channelB_OnOff,
+                                                        1,
+                                                        VoltageLevel, 0
+                                                        );
+
+
 
 
             if (pStat == 0)
@@ -145,7 +156,9 @@ namespace PicoGUI
             while (whileloop)
             {
                 //GetStreamingLatestValues
-                pStat = PS2000ACSConsole.Imports.GetStreamingLatestValues(handle, StreamingCallback, (IntPtr)PS2000ACSConsole.Imports.Mode.ANALOGUE);
+                pStat = PS2000ACSConsole.Imports.GetStreamingLatestValues(handle,
+                                                                          StreamingCallback, 
+                                                                          (IntPtr)PS2000ACSConsole.Imports.Mode.ANALOGUE);
             }
 
 
@@ -203,6 +216,18 @@ namespace PicoGUI
 
             }
             }
+
+        public double GetTimeInterval()
+        {
+            double TimeInterval = 0;
+
+            Imports.GetTimebase(handle, )
+
+
+
+
+            return TimeBase;
+        }
 
     }
 }
