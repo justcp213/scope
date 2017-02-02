@@ -62,7 +62,17 @@ namespace PicoGUI
                                                         VoltageLevel, 0
                                                         );
 
+            //Disable Digitalports
+            Imports.Channel port;
+            short status;
 
+            // Disable Digital ports 
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+            for (port = Imports.Channel.PS2000A_DIGITAL_PORT0; port < Imports.Channel.PS2000A_DIGITAL_PORT1; port++) //
+            {                                                                                                        //
+                status = Imports.SetDigitalPort(handle, port, 0, 0);                                                 //
+            }                                                                                                        //
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
             if (pStat == 0)
@@ -219,14 +229,22 @@ namespace PicoGUI
 
         public double GetTimeInterval()
         {
-            double TimeInterval = 0;
+            uint Timebase = 0;
+            uint nosamples = 1024;
+            Timebase = 8;// 6.64;
+            int timeinterval;
+            short oversample = 1;
+            int maxsamples;
 
-            Imports.GetTimebase(handle, )
+            pStat = Imports.GetTimebase(handle, Timebase, (int)nosamples, out timeinterval, oversample, out maxsamples, 0);
 
 
 
+            if (pStat == 0)
 
-            return TimeBase;
+                return Timebase;
+            else
+                return 0;
         }
 
     }
