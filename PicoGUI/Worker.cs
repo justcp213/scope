@@ -16,7 +16,7 @@ namespace PicoGUI
         short pStat = 0;
         uint bufferlength = 50000;
         public string destinationfile = "";
-        short[] buffer;
+        short[] buffer = new short[50000];
         int _sampleCount = 0;
         uint _startIndex = 0;
         bool _autoStop;
@@ -24,18 +24,25 @@ namespace PicoGUI
         short _trig;
         uint _trigAt;
 
+        Imports.RatioMode RatioMode = Imports.RatioMode.Average;
+
         short[][] appBuffers;
         short[][] buffers;
         short[][] appDigiBuffers;
         short[][] digiBuffers;
+
+        PinnedArray<short>[] appBuffersPinned = new PinnedArray<short>[2];
+        
+
         //Device-relevant data
         short handle;
         StringBuilder StB = new StringBuilder();
 
         public bool InitPS2000A()
         {
-
-           pStat =  PS2000ACSConsole.Imports.OpenUnit(out handle, null);
+            appBuffers = new short[50000][];
+            buffers = new short[50000][];
+            pStat =  PS2000ACSConsole.Imports.OpenUnit(out handle, null);
             if (pStat == 0)
                 return true;
             else
@@ -45,17 +52,18 @@ namespace PicoGUI
 
         public bool SetChannel(short channelA_OnOff, short channelB_OnOff, Imports.Range VoltageLevel)
         {
-            pStat = PS2000ACSConsole.Imports.SetTriggerChannelProperties(handle, null, 0, 0, 0); //Disable Trigger
+
+            short a = PS2000ACSConsole.Imports.SetTriggerChannelProperties(handle, null, 0, 0, 0); //Disable Trigger
 
             //Channel A
-            pStat = PS2000ACSConsole.Imports.SetChannel(handle,
+            short b = PS2000ACSConsole.Imports.SetChannel(handle,
                                                         Imports.Channel.ChannelA,
                                                         channelA_OnOff,
                                                         1,
                                                         VoltageLevel, 0
                                                         );
             //Channel B
-            pStat = PS2000ACSConsole.Imports.SetChannel(handle,
+            short c = PS2000ACSConsole.Imports.SetChannel(handle,
                                                         Imports.Channel.ChannelB,
                                                         channelB_OnOff,
                                                         1,
@@ -64,7 +72,7 @@ namespace PicoGUI
 
             //Disable Digitalports
             Imports.Channel port;
-            short status;
+            short status = 0;
 
             // Disable Digital ports 
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -75,7 +83,7 @@ namespace PicoGUI
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-            if (pStat == 0)
+            if ((a==0)&& (b==0)&& (c==0)&& (status ==0))
                 return true;
             else
                 return false;
@@ -85,11 +93,22 @@ namespace PicoGUI
 
         public bool SetDataBuffer()
         {
-            
-            buffer = new short[bufferlength];
 
-            pStat = PS2000ACSConsole.Imports.SetDataBuffer(handle, PS2000ACSConsole.Imports.Channel.ChannelA, buffer,
-                (int)bufferlength, 0, PS2000ACSConsole.Imports.RatioMode.Aggregate);
+            //buffer = new short[bufferlength];
+
+            //pStat = PS2000ACSConsole.Imports.SetDataBuffer(handle, PS2000ACSConsole.Imports.Channel.ChannelA, buffer,
+            //    (int)bufferlength, 0, RatioMode);
+            buffers = new short[2][];
+            buffers[0] = new short[50000];
+            buffers[1] = new short[50000];
+
+
+            appBuffers[0] = new short[50000];
+            appBuffers[1] = new short[50000];
+
+            appBuffersPinned[0] = new PinnedArray<short>(appBuffers[0]);
+
+            pStat = Imports.SetDataBuffers(handle, Imports.Channel.ChannelA, buffers[0], buffers[1], (int)bufferlength, 0, RatioMode);
 
 
             if (pStat == 0)
@@ -100,10 +119,10 @@ namespace PicoGUI
 
         public bool RunStreaming()
         {
-            uint sampleinterval = 1;
+            uint sampleinterval = 100;
             uint preTrigger = 0;
-            uint postTrigger = 10;
-            uint downsampleRatio = 1;
+            uint postTrigger = 1000000;//10;
+            uint downsampleRatio = 10;//1;
 
             pStat = PS2000ACSConsole.Imports.RunStreaming(handle,
                                                           ref sampleinterval,
@@ -112,7 +131,7 @@ namespace PicoGUI
                                                           postTrigger,
                                                           false,
                                                           downsampleRatio,
-                                                          PS2000ACSConsole.Imports.RatioMode.Aggregate,
+                                                          RatioMode,
                                                           bufferlength);
 
 
@@ -129,6 +148,7 @@ namespace PicoGUI
             // used for streaming
             _sampleCount = noOfSamples;
             _startIndex = startIndex;
+           // Console.WriteLine("Startindex: " + startIndex);
             _autoStop = autoStop != 0;
 
             // flag to say done reading data
@@ -147,8 +167,8 @@ namespace PicoGUI
                         for (int ch = 0; ch < 1; ch ++)
                         {
 
-                                Array.Copy(buffers[ch], _startIndex, appBuffers[ch], _startIndex, _sampleCount); //max
-                                Array.Copy(buffers[ch + 1], _startIndex, appBuffers[ch + 1], _startIndex, _sampleCount); //min
+                                Array.Copy(buffers[ch], _startIndex, appBuffers[ch], _startIndex, _sampleCount); 
+                               // Array.Copy(buffers[ch + 1], _startIndex, appBuffers[ch + 1], _startIndex, _sampleCount); 
                             }
                         
                         break;
@@ -161,17 +181,33 @@ namespace PicoGUI
 
         public void Loop()
         {
-            System.IO.TextWriter writer = new System.IO.StreamWriter(destinationfile, false);
+            Imports.Mode mode = Imports.Mode.ANALOGUE;
+            System.IO.TextWriter writer = new System.IO.StreamWriter("mystream.txt", false);
             writer.WriteLine("Date " + DateTime.Now.ToString("hh:mm:ss")+"\n");
             while (whileloop)
             {
                 //GetStreamingLatestValues
                 pStat = PS2000ACSConsole.Imports.GetStreamingLatestValues(handle,
                                                                           StreamingCallback, 
-                                                                          (IntPtr)PS2000ACSConsole.Imports.Mode.ANALOGUE);
+                                                                          (System.IntPtr)mode);
+                //Console.WriteLine("Stream: " + pStat);
+                if (_sampleCount > 0)
+                {
+                    for(uint i = _startIndex; i < (_startIndex + _sampleCount); i++) {
+                    //    Console.WriteLine("_startIndex " + this._startIndex + " SampleCount " + (_startIndex +_sampleCount));
+                    writer.WriteLine(appBuffersPinned[0].Target[i]);
+                    }
+
+                }
+                if(_sampleCount >= 50000)
+                {
+                    Array.Clear(appBuffers, 0, appBuffers.Length);
+                }
             }
 
-
+            pStat = Imports.Stop(handle);
+            writer.Close();
+            Console.WriteLine("Streaming stopped.");
         }
 
 
@@ -231,7 +267,7 @@ namespace PicoGUI
         {
             uint Timebase = 0;
             uint nosamples = 1024;
-            Timebase = 8;// 6.64;
+            Timebase = 10;// 6.64;
             int timeinterval;
             short oversample = 1;
             int maxsamples;
@@ -242,7 +278,7 @@ namespace PicoGUI
 
             if (pStat == 0)
 
-                return Timebase;
+                return timeinterval;
             else
                 return 0;
         }

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Threading;
 
 
 
@@ -42,6 +43,7 @@ namespace PicoGUI
 
                 //Hier Prozedur stoppen
                 picoclass.whileloop = false;
+                button2.Text = "Start Streaming";
             }
         }
 
@@ -62,16 +64,25 @@ namespace PicoGUI
 
         private void Thread_program()
         {
-            short channelA = ON;   
-            short channelB = OFF;
+            short ChA_State = ON;   
+            short ChB_State = OFF;
 
             bool progress;
 
-            progress = picoclass.InitPS2000A();        
-            progress = picoclass.SetChannel(channelA,channelB, PS2000ACSConsole.Imports.Range.Range_2V);
+            progress = picoclass.InitPS2000A();
+            Console.WriteLine("InitPs2000A: " + progress);
 
+            progress = picoclass.SetChannel(ChA_State, ChB_State, PS2000ACSConsole.Imports.Range.Range_2V);
+            Console.WriteLine("SetChannel " + progress);
             progress = picoclass.SetDataBuffer();
+            Console.WriteLine("SetDataBuffer " + progress);
+
+            picoclass.GetTimeInterval();
             progress = picoclass.RunStreaming();
+            Console.WriteLine("RunStreaming " + progress);
+
+            Thread T1 = new Thread(picoclass.Loop);
+            T1.Start();
         }
     }
 }
