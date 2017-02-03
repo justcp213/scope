@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PS2000ACSConsole", "PS2000ACSConsole.csproj", "{4F5EA46C-7ACA-44CA-A9F9-6DAE9929CCB9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PicoGUI", "PicoGUI\PicoGUI.csproj", "{98097AE8-A6CD-4368-9879-CB7A11CC8F0A}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "GraphicalView", "..\GraphicalView\GraphicalView.pyproj", "{18038C1B-4C30-4662-8787-F29B31E15E51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,6 +58,16 @@ Global
 		{98097AE8-A6CD-4368-9879-CB7A11CC8F0A}.Release|x64.Build.0 = Release|Any CPU
 		{98097AE8-A6CD-4368-9879-CB7A11CC8F0A}.Release|x86.ActiveCfg = Release|Any CPU
 		{98097AE8-A6CD-4368-9879-CB7A11CC8F0A}.Release|x86.Build.0 = Release|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Release|Win32.ActiveCfg = Release|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Release|x64.ActiveCfg = Release|Any CPU
+		{18038C1B-4C30-4662-8787-F29B31E15E51}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

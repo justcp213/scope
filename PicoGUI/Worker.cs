@@ -25,6 +25,7 @@ namespace PicoGUI
         uint _trigAt;
 
         Imports.RatioMode RatioMode = Imports.RatioMode.Average;
+        Imports.Range VRange = Imports.Range.Range_2V;
 
         short[][] appBuffers;
         short[][] buffers;
@@ -121,7 +122,7 @@ namespace PicoGUI
         {
             uint sampleinterval = 100;
             uint preTrigger = 0;
-            uint postTrigger = 1000000;//10;
+            uint postTrigger = 100000;//10;
             uint downsampleRatio = 10;//1;
 
             pStat = PS2000ACSConsole.Imports.RunStreaming(handle,

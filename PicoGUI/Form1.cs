@@ -18,6 +18,7 @@ namespace PicoGUI
     public partial class Form1 : Form
     {
        public bool button2status = false;
+        bool device_init = false;
        Worker picoclass = new Worker();
         public const short ON = 1;
         public const short OFF = 0;
@@ -35,7 +36,13 @@ namespace PicoGUI
                 picoclass.whileloop = true;
                 button2.Text = "Stop Streaming";
                 //Hier Prozedur anfangen
-                Thread_program();
+                if (!device_init)
+                    Init_Device();
+
+
+
+                Task.Factory.StartNew(picoclass.Loop);
+
             }
             else
             {
@@ -62,7 +69,7 @@ namespace PicoGUI
         }
 
 
-        private void Thread_program()
+        private void Init_Device()
         {
             short ChA_State = ON;   
             short ChB_State = OFF;
@@ -72,7 +79,7 @@ namespace PicoGUI
             progress = picoclass.InitPS2000A();
             Console.WriteLine("InitPs2000A: " + progress);
 
-            progress = picoclass.SetChannel(ChA_State, ChB_State, PS2000ACSConsole.Imports.Range.Range_2V);
+            progress = picoclass.SetChannel(ChA_State, ChB_State, PS2000ACSConsole.Imports.Range.Range_5V);
             Console.WriteLine("SetChannel " + progress);
             progress = picoclass.SetDataBuffer();
             Console.WriteLine("SetDataBuffer " + progress);
@@ -81,8 +88,9 @@ namespace PicoGUI
             progress = picoclass.RunStreaming();
             Console.WriteLine("RunStreaming " + progress);
 
-            Thread T1 = new Thread(picoclass.Loop);
-            T1.Start();
+
+            device_init = true;
+      
         }
     }
 }

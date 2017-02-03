@@ -1823,7 +1823,7 @@ namespace PS2000ACSConsole
             {
                 _channelSettings[i].enabled = true;
                 _channelSettings[i].DCcoupled = true;
-                _channelSettings[i].range = Imports.Range.Range_5V;
+                _channelSettings[i].range = Imports.Range.Range_2V;
             }
 
             // main loop - read key and call routine
