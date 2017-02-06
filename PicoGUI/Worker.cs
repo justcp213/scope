@@ -24,7 +24,7 @@ namespace PicoGUI
         short _trig;
         uint _trigAt;
 
-        Imports.RatioMode RatioMode = Imports.RatioMode.Average;
+        Imports.RatioMode RatioMode = Imports.RatioMode.None;
         Imports.Range VRange = Imports.Range.Range_2V;
 
         short[][] appBuffers;
@@ -110,7 +110,7 @@ namespace PicoGUI
             appBuffersPinned[0] = new PinnedArray<short>(appBuffers[0]);
 
             pStat = Imports.SetDataBuffers(handle, Imports.Channel.ChannelA, buffers[0], buffers[1], (int)bufferlength, 0, RatioMode);
-
+           // pStat = Imports.SetDataBuffer(handle, Imports.Channel.ChannelA, buffer, (int)bufferlength, 0, Imports.RatioMode.None);
 
             if (pStat == 0)
                 return true;
@@ -120,10 +120,10 @@ namespace PicoGUI
 
         public bool RunStreaming()
         {
-            uint sampleinterval = 100;
+            uint sampleinterval = 1000000;
             uint preTrigger = 0;
             uint postTrigger = 100000;//10;
-            uint downsampleRatio = 10;//1;
+            uint downsampleRatio = 1;//10;//1;
 
             pStat = PS2000ACSConsole.Imports.RunStreaming(handle,
                                                           ref sampleinterval,
@@ -167,7 +167,7 @@ namespace PicoGUI
 
                         for (int ch = 0; ch < 1; ch ++)
                         {
-
+                            Console.WriteLine(_startIndex);
                                 Array.Copy(buffers[ch], _startIndex, appBuffers[ch], _startIndex, _sampleCount); 
                                // Array.Copy(buffers[ch + 1], _startIndex, appBuffers[ch + 1], _startIndex, _sampleCount); 
                             }
@@ -196,7 +196,7 @@ namespace PicoGUI
                 {
                     for(uint i = _startIndex; i < (_startIndex + _sampleCount); i++) {
                     //    Console.WriteLine("_startIndex " + this._startIndex + " SampleCount " + (_startIndex +_sampleCount));
-                    writer.WriteLine(appBuffersPinned[0].Target[i]);
+                    writer.WriteLine( Convert_Dig_To_Voltage( appBuffersPinned[0].Target[i]));
                     }
 
                 }
@@ -268,20 +268,30 @@ namespace PicoGUI
         {
             uint Timebase = 0;
             uint nosamples = 1024;
-            Timebase = 10;// 6.64;
+            Timebase = 10; //4294967294;//10;;
             int timeinterval;
             short oversample = 1;
             int maxsamples;
 
             pStat = Imports.GetTimebase(handle, Timebase, (int)nosamples, out timeinterval, oversample, out maxsamples, 0);
 
-
+            Console.WriteLine("Timeinterval: " + timeinterval);
 
             if (pStat == 0)
-
+                
                 return timeinterval;
             else
                 return 0;
+        }
+
+
+        private int Convert_Dig_To_Voltage(int value)
+        {
+            //gibt den Wert als mV zurueck
+
+            return (value * 2000) / Imports.MaxValue;
+
+
         }
 
     }

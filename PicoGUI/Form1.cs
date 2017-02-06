@@ -39,7 +39,7 @@ namespace PicoGUI
                 if (!device_init)
                     Init_Device();
 
-
+                RunStreaming();
 
                 Task.Factory.StartNew(picoclass.Loop);
 
@@ -78,19 +78,41 @@ namespace PicoGUI
 
             progress = picoclass.InitPS2000A();
             Console.WriteLine("InitPs2000A: " + progress);
+            if (progress) { 
+                progress = picoclass.SetChannel(ChA_State, ChB_State, PS2000ACSConsole.Imports.Range.Range_2V);
+                Console.WriteLine("SetChannel " + progress);
 
-            progress = picoclass.SetChannel(ChA_State, ChB_State, PS2000ACSConsole.Imports.Range.Range_5V);
-            Console.WriteLine("SetChannel " + progress);
-            progress = picoclass.SetDataBuffer();
-            Console.WriteLine("SetDataBuffer " + progress);
+                if (progress) { 
+                                progress = picoclass.SetDataBuffer();
+                                Console.WriteLine("SetDataBuffer " + progress);
+                }
+                if (progress)
+                {
+                    button3.Enabled = false;
+                    button2.Enabled = true;
+                }
+            }
+            //picoclass.GetTimeInterval();
+            //progress = picoclass.RunStreaming();
+            //Console.WriteLine("RunStreaming " + progress);
 
+            
+            device_init = true;
+      
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            Init_Device();
+        }
+
+        private void RunStreaming()
+        {
+            //Funktion am 06.02 geschrieben um das Init vom automatischen Streamstart abzukoppeln
+            bool progress;
             picoclass.GetTimeInterval();
             progress = picoclass.RunStreaming();
             Console.WriteLine("RunStreaming " + progress);
-
-
-            device_init = true;
-      
         }
     }
 }
