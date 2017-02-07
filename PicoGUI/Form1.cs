@@ -13,20 +13,29 @@ using System.Threading;
 
 namespace PicoGUI
 {
-   
-    
+
+
     public partial class Form1 : Form
     {
-       public bool button2status = false;
+        public bool button2status = false;
         bool device_init = false;
-       Worker picoclass = new Worker();
+        Worker picoclass;
         public const short ON = 1;
         public const short OFF = 0;
-               
-    public Form1()
+
+        PS2000ACSConsole.Imports.Range Vrange;
+
+        Label[] labelindex = new Label[2];
+
+        public Form1()
         {
+            picoclass = new Worker(this);
             InitializeComponent();
-        }
+            VoltageComboBox.SelectedIndex = 5;
+            CouplingComboBox.SelectedIndex = 1;
+            labelindex[0] = abtastintervall_label ;
+            labelindex[1] = Abtastrate_label;
+    }
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -79,7 +88,7 @@ namespace PicoGUI
             progress = picoclass.InitPS2000A();
             Console.WriteLine("InitPs2000A: " + progress);
             if (progress) { 
-                progress = picoclass.SetChannel(ChA_State, ChB_State, PS2000ACSConsole.Imports.Range.Range_2V);
+                progress = picoclass.SetChannel(ChA_State, ChB_State, Vrange);
                 Console.WriteLine("SetChannel " + progress);
 
                 if (progress) { 
@@ -103,16 +112,43 @@ namespace PicoGUI
 
         private void button3_Click(object sender, EventArgs e)
         {
+            GetSettings();
             Init_Device();
+            picoclass.GetTimeInterval();
+        }
+
+        private void GetSettings()
+        {
+
+            Vrange = (PS2000ACSConsole.Imports.Range)(VoltageComboBox.SelectedIndex+2);
+            picoclass.coupling_type = (short)CouplingComboBox.SelectedIndex;
+
+            picoclass.VRange = Vrange;
+
+
         }
 
         private void RunStreaming()
         {
             //Funktion am 06.02 geschrieben um das Init vom automatischen Streamstart abzukoppeln
             bool progress;
-            picoclass.GetTimeInterval();
+           // picoclass.GetTimeInterval();
             progress = picoclass.RunStreaming();
             Console.WriteLine("RunStreaming " + progress);
+        }
+
+        public void SetLabels(string text, int labelno)
+        {
+            //0 abtastintervall
+            //1 abtastrate
+            if (labelindex[labelno].InvokeRequired)
+            {
+                Invoke(new MethodInvoker(() => labelindex[labelno].Text = text));
+
+            }
+            else
+                labelindex[labelno].Text = text;
+
         }
     }
 }

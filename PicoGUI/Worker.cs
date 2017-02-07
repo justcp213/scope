@@ -10,6 +10,8 @@ namespace PicoGUI
 
     public class Worker
     {
+
+         
         PS2000ACSConsole.Imports ImportPS = new PS2000ACSConsole.Imports();
         public bool whileloop;
 
@@ -24,20 +26,32 @@ namespace PicoGUI
         short _trig;
         uint _trigAt;
 
-        Imports.RatioMode RatioMode = Imports.RatioMode.None;
-        Imports.Range VRange = Imports.Range.Range_2V;
+        public Imports.RatioMode RatioMode = Imports.RatioMode.None;
+        public Imports.Range VRange;// = Imports.Range.Range_2V;
+        public Imports.Mode mode= Imports.Mode.ANALOGUE;
+        public short coupling_type;
 
+        public uint official_abtastinterval;
+        public uint official_samplespersecond;
+        bool ResetState = false;
         short[][] appBuffers;
         short[][] buffers;
         short[][] appDigiBuffers;
         short[][] digiBuffers;
 
         PinnedArray<short>[] appBuffersPinned = new PinnedArray<short>[2];
+        Form1 UseForm;
         
-
         //Device-relevant data
         short handle;
         StringBuilder StB = new StringBuilder();
+
+        public Worker(Form1 MainForm)
+        {
+            this.UseForm = MainForm;
+        }
+
+
 
         public bool InitPS2000A()
         {
@@ -60,14 +74,14 @@ namespace PicoGUI
             short b = PS2000ACSConsole.Imports.SetChannel(handle,
                                                         Imports.Channel.ChannelA,
                                                         channelA_OnOff,
-                                                        1,
+                                                        coupling_type,
                                                         VoltageLevel, 0
                                                         );
             //Channel B
             short c = PS2000ACSConsole.Imports.SetChannel(handle,
                                                         Imports.Channel.ChannelB,
                                                         channelB_OnOff,
-                                                        1,
+                                                        coupling_type,
                                                         VoltageLevel, 0
                                                         );
 
@@ -84,7 +98,7 @@ namespace PicoGUI
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-            if ((a==0)&& (b==0)&& (c==0)&& (status ==0))
+            if ((a==0) && (b==0) && (c==0) && (status ==0))
                 return true;
             else
                 return false;
@@ -120,7 +134,7 @@ namespace PicoGUI
 
         public bool RunStreaming()
         {
-            uint sampleinterval = 1000000;
+            uint sampleinterval = 100000;//1000000;
             uint preTrigger = 0;
             uint postTrigger = 100000;//10;
             uint downsampleRatio = 1;//10;//1;
@@ -138,9 +152,10 @@ namespace PicoGUI
 
             if (pStat == 0)
                 return true;
-            else
+            else {
+                Console.WriteLine("  - Error 0x{0:X}", pStat);
                 return false;
-
+            }
         }
 
 
@@ -182,9 +197,9 @@ namespace PicoGUI
 
         public void Loop()
         {
-            Imports.Mode mode = Imports.Mode.ANALOGUE;
+            
             System.IO.TextWriter writer = new System.IO.StreamWriter("mystream.txt", false);
-            writer.WriteLine("Date " + DateTime.Now.ToString("hh:mm:ss")+"\n");
+            writer.WriteLine("Date " + DateTime.Now.ToString("dd/MM/yy - hh:mm:ss")+ "Timeinterval (ns)" + official_abtastinterval +"\n");
             while (whileloop)
             {
                 //GetStreamingLatestValues
@@ -200,12 +215,12 @@ namespace PicoGUI
                     }
 
                 }
-                if(_sampleCount >= 50000)
+                if(_sampleCount >= 50000 && ResetState)
                 {
                     Array.Clear(appBuffers, 0, appBuffers.Length);
                 }
             }
-
+       
             pStat = Imports.Stop(handle);
             writer.Close();
             Console.WriteLine("Streaming stopped.");
@@ -213,73 +228,28 @@ namespace PicoGUI
 
 
 
-        public void StreamDataHandler()
-        {
-            uint tempBufferSize = 50000; /*  Ensure buffer is large enough */
-
-            uint totalSamples = 0;
-            uint triggeredAt = 0;
-            short status;
-
-            uint downsampleRatio;
-            Imports.ReportedTimeUnits timeUnits;
-            uint sampleInterval;
-            Imports.RatioMode ratioMode;
-            uint postTrigger;
-            bool autoStop;
-
-            int _channelCount = 0;
-            int _digitalPorts = 0;
-
-
-            // Use Pinned Arrays for the application buffers
-            PinnedArray<short>[] appBuffersPinned = new PinnedArray<short>[_channelCount * 2];
-            PinnedArray<short>[] appDigiBuffersPinned = new PinnedArray<short>[_digitalPorts * 2];
-
-            //Größen Initialisierung der Buffers
-            appBuffers = new short[_channelCount * 2][];
-            buffers = new short[_channelCount * 2][];
-
-            for (int channel = 0; channel < _channelCount * 2; channel += 2) // create data buffers
-            {
-                appBuffers[channel] = new short[tempBufferSize];
-                appBuffers[channel + 1] = new short[tempBufferSize];
-
-                appBuffersPinned[channel] = new PinnedArray<short>(appBuffers[channel]);
-                appBuffersPinned[channel + 1] = new PinnedArray<short>(appBuffers[channel + 1]);
-
-                buffers[channel] = new short[tempBufferSize];
-                buffers[channel + 1] = new short[tempBufferSize];
-
-                status = Imports.SetDataBuffers(handle, (Imports.Channel)(channel / 2), buffers[channel], buffers[channel + 1], (int)tempBufferSize, 0, Imports.RatioMode.Aggregate);
-
-
-                downsampleRatio = 1000;
-                timeUnits = Imports.ReportedTimeUnits.MicroSeconds;
-                sampleInterval = 1;
-                ratioMode = Imports.RatioMode.Aggregate;
-                postTrigger = 1000000;
-                autoStop = true;
-
-            }
-            }
+      
 
         public double GetTimeInterval()
         {
-            uint Timebase = 0;
+            uint Timebase = 15;//10;    //15 entspricht 104 ns -> 1 MS bzw 9,615 MS/s, 134217728 entspricht 1s
             uint nosamples = 1024;
-            Timebase = 10; //4294967294;//10;;
-            int timeinterval;
+            
+            int abtastinterval;
             short oversample = 1;
             int maxsamples;
 
-            pStat = Imports.GetTimebase(handle, Timebase, (int)nosamples, out timeinterval, oversample, out maxsamples, 0);
+            pStat = Imports.GetTimebase(handle, Timebase, (int)nosamples, out abtastinterval, oversample, out maxsamples, 0);
 
-            Console.WriteLine("Timeinterval: " + timeinterval);
+            official_abtastinterval = (uint)abtastinterval;
+
+            SetSamplingInformation((uint)abtastinterval);
+            Console.WriteLine("Abtastintervall: " + abtastinterval);
+            Console.WriteLine("Maxsamples  : " + maxsamples);
 
             if (pStat == 0)
                 
-                return timeinterval;
+                return abtastinterval;
             else
                 return 0;
         }
@@ -292,6 +262,21 @@ namespace PicoGUI
             return (value * 2000) / Imports.MaxValue;
 
 
+        }
+
+        private double Convert_Samplinginterval_To_Samplingrate(uint interval)
+        {
+
+            return (1 * Math.Pow(10, 9) / interval)  ;  // * 10^9 weil interval immer in Nanosekunden
+
+        }
+
+        private void SetSamplingInformation(uint abtastinterval)
+        {
+            //Abtastintervall hat index 0
+            UseForm.SetLabels(abtastinterval.ToString() + " ns", 0);
+
+            UseForm.SetLabels((Convert_Samplinginterval_To_Samplingrate(abtastinterval)/Math.Pow(10,6)).ToString("N"+3) + " MS/s", 1);
         }
 
     }
