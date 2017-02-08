@@ -134,17 +134,17 @@ namespace PicoGUI
 
         public bool RunStreaming()
         {
-            uint sampleinterval = 100000;//1000000;
-            uint preTrigger = 0;
-            uint postTrigger = 100000;//10;
+            uint sampleinterval = 100;//1000000;
+            uint maxPreTriggerSamples = 0;
+            uint maxPostTriggerSamples = 800;// 100000;  //Anzahl der Aufnahmen !!!
             uint downsampleRatio = 1;//10;//1;
-
+            bool autostop = true;
             pStat = PS2000ACSConsole.Imports.RunStreaming(handle,
                                                           ref sampleinterval,
                                                           PS2000ACSConsole.Imports.ReportedTimeUnits.NanoSeconds,
-                                                          preTrigger,
-                                                          postTrigger,
-                                                          false,
+                                                          maxPreTriggerSamples,
+                                                          maxPostTriggerSamples,
+                                                          autostop,
                                                           downsampleRatio,
                                                           RatioMode,
                                                           bufferlength);
@@ -199,7 +199,7 @@ namespace PicoGUI
         {
             
             System.IO.TextWriter writer = new System.IO.StreamWriter("mystream.txt", false);
-            writer.WriteLine("Date " + DateTime.Now.ToString("dd/MM/yy - hh:mm:ss")+ "Timeinterval (ns)" + official_abtastinterval +"\n");
+            writer.WriteLine("Date " + DateTime.Now.ToString("dd/MM/yy - hh:mm:ss")+ "Timeinterval (ns)" + official_abtastinterval +";");
             while (whileloop)
             {
                 //GetStreamingLatestValues
@@ -211,7 +211,7 @@ namespace PicoGUI
                 {
                     for(uint i = _startIndex; i < (_startIndex + _sampleCount); i++) {
                     //    Console.WriteLine("_startIndex " + this._startIndex + " SampleCount " + (_startIndex +_sampleCount));
-                    writer.WriteLine( Convert_Dig_To_Voltage( appBuffersPinned[0].Target[i]));
+                    writer.WriteLine( Convert_Dig_To_Voltage( appBuffersPinned[0].Target[i]) + ";");
                     }
 
                 }

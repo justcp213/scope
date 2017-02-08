@@ -22,7 +22,7 @@ namespace PicoGUI
         Worker picoclass;
         public const short ON = 1;
         public const short OFF = 0;
-
+        System.Diagnostics.Stopwatch Stopwatch = new System.Diagnostics.Stopwatch();
         PS2000ACSConsole.Imports.Range Vrange;
 
         Label[] labelindex = new Label[2];
@@ -47,7 +47,9 @@ namespace PicoGUI
                 //Hier Prozedur anfangen
                 if (!device_init)
                     Init_Device();
-
+                Stopwatch.Start();
+                timer1.Enabled = true;
+                
                 RunStreaming();
 
                 Task.Factory.StartNew(picoclass.Loop);
@@ -55,11 +57,14 @@ namespace PicoGUI
             }
             else
             {
+                Stopwatch.Stop();
+                timer1.Enabled = false;
                 button2status = false;
 
                 //Hier Prozedur stoppen
                 picoclass.whileloop = false;
                 button2.Text = "Start Streaming";
+                Stopwatch.Reset();
             }
         }
 
@@ -149,6 +154,11 @@ namespace PicoGUI
             else
                 labelindex[labelno].Text = text;
 
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            TimerLabel.Text = Stopwatch.ElapsedMilliseconds.ToString();
         }
     }
 }

@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.button1 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -49,6 +50,8 @@
             this.label5 = new System.Windows.Forms.Label();
             this.abtastintervall_label = new System.Windows.Forms.Label();
             this.Abtastrate_label = new System.Windows.Forms.Label();
+            this.TimerLabel = new System.Windows.Forms.Label();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
@@ -289,11 +292,26 @@
             this.Abtastrate_label.TabIndex = 3;
             this.Abtastrate_label.Text = "--";
             // 
+            // TimerLabel
+            // 
+            this.TimerLabel.AutoSize = true;
+            this.TimerLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.TimerLabel.Location = new System.Drawing.Point(524, 330);
+            this.TimerLabel.Name = "TimerLabel";
+            this.TimerLabel.Size = new System.Drawing.Size(52, 20);
+            this.TimerLabel.TabIndex = 7;
+            this.TimerLabel.Text = "--:-- s";
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(617, 386);
+            this.Controls.Add(this.TimerLabel);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.button3);
@@ -339,6 +357,8 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label abtastintervall_label;
         private System.Windows.Forms.Label Abtastrate_label;
+        private System.Windows.Forms.Label TimerLabel;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 
